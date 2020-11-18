@@ -10,12 +10,13 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 function displayCard(c){
     return `
-        <div class="card">
+        <div class="card" data-title="${c.title}">
             <img src="${c.poster}" class="card-img-top" alt="...">
             <div class="card-body">
                 <h5 class="card-title">${c.title}</h5>
                 <p class="card-text">${c.description}</p>
                 <a href="#" class="btn btn-primary">Go somewhere</a>
+                <button class="btn btn-danger delete-card">Delete</button>
             </div>
         </div>
     `
@@ -30,6 +31,26 @@ function displayCards(){
         col.innerHTML = displayCard(c)
         document.querySelector('#cards').appendChild(col)
     }
+
+    document.querySelectorAll('.delete-card').forEach(function(b){
+        b.onclick = function(event){
+            let cards = JSON.parse(localStorage.getItem('cards') || '[]')
+            let ndx = -1
+            for(let i in cards){
+                if(cards[i].title === event.target.closest('.card').dataset.title){
+                    ndx = i
+                    break
+                }
+            }
+
+            if(ndx != -1){
+                cards.splice(ndx, 1)
+                localStorage.setItem('cards', JSON.stringify(cards))
+                location.reload()
+            }
+
+        }
+    })
 }
 
 function addNewCard(event){
@@ -54,13 +75,20 @@ function addNewCard(event){
 
     displayCards()
 }
+
+
 document.querySelector('#new_card').onclick = function(){
     document.querySelector('#myForm').classList.remove('d-none')
     document.querySelector('#cards').classList.add('d-none')
 }
-document.forms[0].querySelector('[type="button"]').onclick = function(){
+document.forms[0].querySelector('[type="button"]').onclick = function(e){
     document.querySelector('#cards').classList.remove('d-none')
     document.querySelector('#myForm').classList.add('d-none')
+
+    if(e.target.classList.contains('cancel-form')){
+        e.target.closest('form').reset()
+    }
 }
 
 document.forms[0].addEventListener('submit', addNewCard, false)
+displayCards()
